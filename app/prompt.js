@@ -125,9 +125,12 @@ class CountdownPrompt {
 		this.activated = true;
 		this.duration = duration;
 		this.container = $("#prompt");
+		this.soundFile = "audio/electronic_chime.mp3";
 
 		this.htmlPre = '<span id="countdown">';
-		this.htmlPost = '</span>';
+		this.htmlPost = '</span>'
+		this.soundLink = "<audio src='" + this.soundFile + "' autoplay>";
+		console.log(this.soundLink);
 	}
 
 	start(stay=false, instant=false, callback) {
@@ -138,14 +141,14 @@ class CountdownPrompt {
 			$(self.container).fadeIn(250);
 
 			// first time run immediatly	
-			self.html = self.htmlPre + self.duration + self.htmlPost;
+			self.html = self.htmlPre + self.duration + self.htmlPost + self.soundLink;
 			$(self.container).html(self.html);
 			$(self.container).children().fadeOut(900);
 			self.duration--;
 
 			self.interval = setInterval(function() {
 				if (self.duration > 0) {
-					self.html = self.htmlPre + self.duration + self.htmlPost;
+					self.html = self.htmlPre + self.duration + self.htmlPost + self.soundLink;
 					$(self.container).html(self.html);
 					$(self.container).children().fadeOut(900);
 					self.duration--;
