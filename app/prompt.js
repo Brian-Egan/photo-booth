@@ -130,7 +130,6 @@ class CountdownPrompt {
 		this.htmlPre = '<span id="countdown">';
 		this.htmlPost = '</span>'
 		this.soundLink = "<audio src='" + this.soundFile + "' autoplay>";
-		console.log(this.soundLink);
 	}
 
 	start(stay=false, instant=false, callback) {

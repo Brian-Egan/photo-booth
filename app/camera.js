@@ -23,6 +23,12 @@ import gphoto2 from 'gphoto2';
 
 import utils from "./utils.js";
 
+// window.sharp = sharp;
+
+var fs = require('fs');
+
+window.fs = fs;
+
 class Camera {
 
 	constructor() {
@@ -88,7 +94,20 @@ class Camera {
 		const webFilepath = utils.getWebAppPhotosDirectory() + "img_" + utils.getTimestamp() + ".jpg";
 		const maxImageSize = utils.getConfig().maxImageSize ? utils.getConfig().maxImageSize : 1500;
 		const keep = utils.getConfig().gphoto2.keep === true ?  true : false;
+		const watermarkDir = utils.getPhotosDirectory().replace("photos","watermarks"); // Keep .png watermarks in the /watermarks directory
 
+		if (fs.existsSync(watermarkDir) == true) {
+			// Get a random watermark from the directory. Or the only one. Must me formatted as .png
+			var watermarks = fs.readdirSync(watermarkDir).filter(function(f) {return f.indexOf(".png") > 0});
+			var overlayImg = watermarkDir + watermarks[Math.floor(Math.random()*watermarks.length)];
+		} else {
+			var overlayImg = false;
+		}
+
+
+		// const overlayImg = utils.getPhotosDirectory().replace("photos","watermarks") + "overlay.png";
+		// const overlayImg = "/Users/began/projects/content/overlay3.png";
+		console.log("overlay image is " + overlayImg);
 		self.camera.takePicture({ download: true, keep: keep }, function (err, data) {
 
 			if (err) {
@@ -97,13 +116,29 @@ class Camera {
 				return;
 			} 
 
-			sharp(data) // resize image to given maxSize
-				.resize(Number(maxImageSize)) // scale width to 1500
-				.toFile(filepath, function(err) {
+			if (overlayImg == false) {
+				var newImg = sharp(data).resize(Number(maxImageSize)); // scale width to 1500
+			} else {
+				var newImg = sharp(data).resize(Number(maxImageSize)).overlayWith(overlayImg, { gravity: sharp.gravity.southeast });
+			}
+			// sharp(data) 
+				// .resize(Number(maxImageSize)) // scale width to 1500
+				// .toFormat("jpeg")
+			// var newImg = sharp(data).resize(Number(maxImageSize)); // resize image to given maxSize
+			// if (fs.existsSync(overlayImg) == true) {
+			// 	newImg.overlayWith(overlayImg, { gravity: sharp.gravity.southeast })
+			// }
+				// .overlayWith('images/overlay1.png', { gravity: sharp.gravity.southeast } ) // Add our watermark
+				// .jpeg()
+				// .toFormat("jpeg")
+
+
+				newImg.toFile(filepath, function(err) {
 					
 				if (err) {
 					callback(-3, 'resizing image failed', err)
 				} else {
+					
 					callback(0, filepath, webFilepath);
 				}
 			});
